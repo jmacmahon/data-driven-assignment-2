@@ -9,7 +9,7 @@ class Data(object):
         self.wordsearch2 = Wordsearch(raw_data['test2'])
 
     def get_train_letter(self, index):
-        return Letter(self._raw_data['train_data'][index, :])
+        return Letter(self._raw_data['train_data'][index, :], self._raw_data['train_labels'][index])
 
     def process_wordsearch(self):
         for i in range(10):
@@ -19,14 +19,18 @@ class Data(object):
 class Wordsearch(object):
     def __init__(self, raw_data):
         self._raw_data = raw_data
-        self.letters = list(self.iter_letters())
-
-    def iter_letters(self):
-        for y in range(0, 15):
-            for x in range(0, 15):
-                yield self.get_letter_at((x, y))
+        self.letters = list(self._iter_extract_letters())
 
     def get_letter_at(self, coords):
+        (x, y) = coords
+        return self.letters(15 * y + x)
+
+    def _iter_extract_letters(self):
+        for y in range(0, 15):
+            for x in range(0, 15):
+                yield self._extract_letter_at((x, y))
+
+    def _extract_letter_at(self, coords):
         (x, y) = coords
         xmin = 30*x
         xmax = 30*(x+1)
@@ -43,8 +47,17 @@ class Wordsearch(object):
 
 
 class Letter(object):
-    def __init__(self, raw_data):
+    def __init__(self, raw_data, label=None):
         self._raw_data = raw_data
+        self.label = label
 
     def show(self):
         return show_letter(self._raw_data)
+
+    def classify(self, classifier):
+        int_label = classifier.classify(self._raw_data)
+        letter_label = chr(64 + int_label)
+        return letter_label
+
+    def __repr__(self):
+        return 'Letter(<data>, ' + repr(self.label) + ')'
