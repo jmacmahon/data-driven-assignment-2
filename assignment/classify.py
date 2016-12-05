@@ -7,15 +7,9 @@ class NearestNeighbour(object):
 
         self._modtrain = np.sqrt(np.sum(training_data ** 2, axis=1))
 
-    def _get_cosine_distance(self, test, modtest, train_index):
-        modtrain = self._modtrain[train_index]
-        train = self._training_data[train_index]
-
-        return np.dot(test, train)/(modtest * modtrain)
-
     def classify(self, test):
-        distances = []
         modtest = np.sqrt(np.sum(test ** 2))
-        for i in range(self._training_data.shape[0]):
-            distances.append((self._get_cosine_distance(test, modtest, i), self._labels[i]))
-        return max(distances)[1]
+        dots = np.dot(test, self._training_data.transpose())
+        distances = dots/(modtest * self._modtrain)
+        nearest_index = np.argmax(distances)
+        return self._labels[nearest_index]

@@ -56,8 +56,8 @@ class Letter(object):
 
     def classify(self, classifier):
         int_label = classifier.classify(self._raw_data)
-        letter_label = chr(64 + int_label)
-        return letter_label
+        self.label = chr(64 + int_label)
+        return self.label
 
     def __repr__(self):
         return 'Letter(<data>, ' + repr(self.label) + ')'
