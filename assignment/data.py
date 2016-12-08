@@ -1,4 +1,5 @@
 from .display import show_letter, show_wordsearch, show_image
+from .wordsearch import Masks
 import numpy as np
 
 
@@ -19,11 +20,28 @@ class Data(object):
 class Wordsearch(object):
     def __init__(self, raw_data):
         self._raw_data = raw_data
+        self._classified = False
         self.letters = list(self._iter_extract_letters())
+
+    def find_word_fits(self, word):
+        masks = Masks(word)
+        fits = masks.get_fits(self)
+        return fits
 
     def get_letter_at(self, coords):
         (x, y) = coords
         return self.letters(15 * y + x)
+
+    def get_classified_array(self):
+        if not self._classified:
+            raise ValueError("not yet classified")
+        letterlist = [l.label for l in self.letters]
+        return np.array(letterlist).reshape((15, 15))
+
+    def classify(self, classifier):
+        for l in self.letters:
+            l.classify(classifier)
+        self._classified = True
 
     def _iter_extract_letters(self):
         for y in range(0, 15):
@@ -56,7 +74,8 @@ class Letter(object):
 
     def classify(self, classifier):
         int_label = classifier.classify(self._raw_data)
-        self.label = chr(64 + int_label)
+        # self.label = chr(64 + int_label)
+        self.label = int_label
         return self.label
 
     def __repr__(self):
