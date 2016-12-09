@@ -25,6 +25,8 @@ def gen_mask_direction(word, direction):
                 for i in word_numbers:
                     current[ypos, xpos] = i
                     xpos, ypos = (xpos + direction[0], ypos + direction[1])
+                    if xpos < 0 or ypos < 0:
+                        raise IndexError
             except IndexError:
                 continue
             yield (current, x, y, direction)
@@ -51,11 +53,9 @@ class Masks(object):
                         self._directions, best, self._word)
 
     def __getitem__(self, index):
-        return {
-            'mask': self._masks[index],
-            'coords': (self._xs[index], self._ys[index]),
-            'direction': self._directions[index],
-        }
+        return {'mask': self._masks[index],
+                'coords': (self._xs[index], self._ys[index]),
+                'direction': self._directions[index]}
 
 
 class MaskFits(object):
