@@ -19,8 +19,8 @@ def pixel_line(start, end, rad=2):
     yellow_pixel = np.array([1, 1, 0, 1])
     for _ in range(steps):
         icurrentx, icurrenty = int(currentx), int(currenty)
-        base[max(0, icurrentx - rad):min(450, icurrentx + rad),
-             max(0, icurrenty - rad):min(450, icurrenty + rad)] = yellow_pixel
+        base[max(0, icurrenty - rad):min(450, icurrenty + rad),
+             max(0, icurrentx - rad):min(450, icurrentx + rad)] = yellow_pixel
         currentx += xstep
         currenty += ystep
     return base
