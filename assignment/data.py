@@ -1,27 +1,39 @@
-from .display import show_letter, show_wordsearch, show_image
+from .display import show_letter, show_wordsearch, show_image, letter_line
 from .wordsearch import Masks
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Data(object):
     def __init__(self, raw_data):
         self._raw_data = raw_data
-        self.wordsearch1 = Wordsearch(raw_data['test1'])
-        self.wordsearch2 = Wordsearch(raw_data['test2'])
+        self.wordsearch1 = Wordsearch(raw_data['test1'], raw_data['words'])
+        self.wordsearch2 = Wordsearch(raw_data['test2'], raw_data['words'])
 
     def get_train_letter(self, index):
-        return Letter(self._raw_data['train_data'][index, :], self._raw_data['train_labels'][index])
-
-    def process_wordsearch(self):
-        for i in range(10):
-            pass
+        return Letter(self._raw_data['train_data'][index, :],
+                      self._raw_data['train_labels'][index])
 
 
 class Wordsearch(object):
-    def __init__(self, raw_data):
+    def __init__(self, raw_data, words):
         self._raw_data = raw_data
         self._classified = False
         self.letters = list(self._iter_extract_letters())
+        self._words = words
+
+    def find_line_image(self, word, rad=2):
+        best = self.find_word_fits(word)[0]
+        x, y = best['coords']
+        x += 0.5
+        y += 0.5
+        return letter_line(x, y, best['direction'], len(word), rad=rad)
+
+    # TODO refactor this into display
+    def find_all_and_show(self, rad=2):
+        lines = [self.find_line_image(word, rad=rad) for word in self._words]
+        self.show()
+        [plt.imshow(line, alpha=0.5) for line in lines]
 
     def find_word_fits(self, word):
         masks = Masks(word)

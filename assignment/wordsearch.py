@@ -37,7 +37,8 @@ def gen_mask(word):
 
 class Masks(object):
     def __init__(self, word):
-        self._masks, self._xs, self._ys, self._directions = zip(*gen_mask(word))
+        self._masks, self._xs, self._ys, self._directions = zip(
+            *gen_mask(word))
         self._word = word
 
     def get_fits(self, wordsearch):
@@ -46,8 +47,8 @@ class Masks(object):
         sums = np.sum(matches, axis=(1, 2))
         # If this is too slow, look at np.argpartition
         best = np.argsort(sums)
-        return MaskFits(sums, self._masks, self._xs, self._ys, self._directions,
-                        best, self._word)
+        return MaskFits(sums, self._masks, self._xs, self._ys,
+                        self._directions, best, self._word)
 
     def __getitem__(self, index):
         return {
@@ -55,6 +56,7 @@ class Masks(object):
             'coords': (self._xs[index], self._ys[index]),
             'direction': self._directions[index],
         }
+
 
 class MaskFits(object):
     def __init__(self, sums, masks, xs, ys, directions, best, word):
@@ -68,9 +70,7 @@ class MaskFits(object):
 
     def __getitem__(self, index):
         orderedIndex = self._best[-(index + 1)]
-        return {
-            'mask': self._masks[orderedIndex],
-            'coords': (self._xs[orderedIndex], self._ys[orderedIndex]),
-            'direction': self._directions[orderedIndex],
-            'score': self._sums[orderedIndex] / len(self._word)
-        }
+        return {'mask': self._masks[orderedIndex],
+                'coords': (self._xs[orderedIndex], self._ys[orderedIndex]),
+                'direction': self._directions[orderedIndex],
+                'score': self._sums[orderedIndex] / len(self._word)}
