@@ -42,13 +42,13 @@ class Wordsearch(object):
 
     def get_letter_at(self, coords):
         (x, y) = coords
-        return self.letters(15 * y + x)
+        return self.letters[15 * y + x]
 
     def get_classified_array(self):
         if not self._classified:
             raise ValueError("not yet classified")
-        letterlist = [l.label for l in self.letters]
-        return np.array(letterlist).reshape((15, 15))
+        letterlist = [l.label_probabilities for l in self.letters]
+        return np.array(letterlist).reshape(15, 15, 26)
 
     def classify(self, classifier):
         for l in self.letters:
@@ -77,18 +77,17 @@ class Wordsearch(object):
 
 
 class Letter(object):
-    def __init__(self, raw_data, label=None):
+    def __init__(self, raw_data, label_probabilities=None):
         self._raw_data = raw_data
-        self.label = label
+        self.label_probabilities = label_probabilities
 
     def show(self):
         return show_letter(self._raw_data)
 
     def classify(self, classifier):
-        int_label = classifier.classify(self._raw_data)
-        # self.label = chr(64 + int_label)
-        self.label = int_label
-        return self.label
+        self.label_probabilities = classifier.weighted_classify(self._raw_data)
+        return self.label_probabilities
 
     def __repr__(self):
-        return 'Letter(<data>, ' + repr(self.label) + ')'
+        label = np.argmax(self.label_probabilities) + 1
+        return 'Letter(<data>, ' + repr(label) + ')'

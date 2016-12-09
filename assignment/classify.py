@@ -3,6 +3,9 @@ from scipy.stats import mode
 
 
 class Classifier(object):
+    def __init__(self):
+        self._confusion_matrix = None
+
     def loo_test(self):
         def loo_test_indiv(index):
             try:
@@ -46,15 +49,30 @@ class Classifier(object):
         # TODO confusion matrix
         return correct / float(n), (n - correct)
 
+    @property
+    def confusion_matrix(self):
+        if self._confusion_matrix is None:
+            self._confusion_matrix = self.loo_test()[0]
+        return self._confusion_matrix
+
 
 class KNearestNeighbour(Classifier):
     def __init__(self, training_data, labels, k=1):
+        super().__init__()
         self._training_data = training_data
         self._labels = labels
         self._k = k
         self._kwargs = {"k": k}
 
         self._modtrain = np.sqrt(np.sum(training_data ** 2, axis=1))
+
+    def weighted_classify(self, test):
+        confusion_matrix = self.confusion_matrix
+        best_label = self.classify(test)
+        probabilities = np.zeros(26)
+        # TODO actually implement this
+        probabilities[best_label - 1] = 1
+        return probabilities
 
     def classify(self, test):
         modtest = np.sqrt(np.sum(test ** 2))

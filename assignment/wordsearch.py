@@ -16,14 +16,14 @@ _directions = [
 
 
 def gen_mask_direction(word, direction):
-    word_numbers = [ord(c) - 96 for c in word.lower()]
+    word_numbers = [ord(c) - 97 for c in word.lower()]
     for y in range(15):
         for x in range(15):
             try:
-                current = np.zeros((15, 15))
+                current = np.zeros((15, 15, 26))
                 xpos, ypos = x, y
                 for i in word_numbers:
-                    current[ypos, xpos] = i
+                    current[ypos, xpos, i] = 1
                     xpos, ypos = (xpos + direction[0], ypos + direction[1])
                     if xpos < 0 or ypos < 0:
                         raise IndexError
@@ -44,9 +44,8 @@ class Masks(object):
         self._word = word
 
     def get_fits(self, wordsearch):
-        # TODO instead of == here make it more fuzzy
-        matches = self._masks == wordsearch.get_classified_array()
-        sums = np.sum(matches, axis=(1, 2))
+        matches = np.array(self._masks) * wordsearch.get_classified_array()
+        sums = np.sum(matches, axis=(1, 2, 3))
         # If this is too slow, look at np.argpartition
         best = np.argsort(sums)
         return MaskFits(sums, self._masks, self._xs, self._ys,
