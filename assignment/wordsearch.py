@@ -95,4 +95,5 @@ class MaskFits(object):
         return {'mask': self._masks[orderedIndex],
                 'coords': (self._xs[orderedIndex], self._ys[orderedIndex]),
                 'direction': self._directions[orderedIndex],
-                'score': self._sums[orderedIndex] / len(self._word)}
+                'score': self._sums[orderedIndex] / len(self._word),
+                'word': self._word}

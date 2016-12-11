@@ -57,7 +57,7 @@ class Classifier(object):
 
 
 class KNearestNeighbour(Classifier):
-    def __init__(self, training_data, labels, k=1, fuzzy=True):
+    def __init__(self, training_data, labels, k=1, fuzzy=False):
         super().__init__()
         self._training_data = training_data
         self._labels = labels
@@ -68,7 +68,8 @@ class KNearestNeighbour(Classifier):
         self._modtrain = np.sqrt(np.sum(training_data ** 2, axis=1))
 
     def weighted_classify(self, test):
-        # Fuzziness improves results on the poor quality image
+        # Fuzziness for some reason makes results worse on the poor quality
+        # image
         confusion_matrix = self.confusion_matrix
         best_label = self.classify(test)
         if self._fuzzy:

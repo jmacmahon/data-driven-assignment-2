@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 class Data(object):
     def __init__(self, raw_data):
         self._raw_data = raw_data
-        self.wordsearch1 = Wordsearch(raw_data['test1'], raw_data['words'])
-        self.wordsearch2 = Wordsearch(raw_data['test2'], raw_data['words'])
+        self.wordsearch1 = Wordsearch(raw_data['test1'], raw_data['words'],
+                                      raw_data['correct_coords'])
+        self.wordsearch2 = Wordsearch(raw_data['test2'], raw_data['words'],
+                                      raw_data['correct_coords'])
 
     def get_train_letter(self, index):
         return Letter(self._raw_data['train_data'][index, :],
@@ -16,11 +18,12 @@ class Data(object):
 
 
 class Wordsearch(object):
-    def __init__(self, raw_data, words):
+    def __init__(self, raw_data, words, solutions):
         self._raw_data = raw_data
         self._classified = False
         self.letters = list(self._iter_extract_letters())
         self._words = words
+        self._solutions = solutions
 
     def find_line_image(self, word, rad=2):
         best = self.find_word_fits(word)[0]
@@ -34,6 +37,32 @@ class Wordsearch(object):
         lines = [self.find_line_image(word, rad=rad) for word in self._words]
         self.show()
         [plt.imshow(line, alpha=0.5) for line in lines]
+
+    def find_all_coords(self):
+        best_fits = [self.find_word_fits(word)[0] for word in self._words]
+        def to_coords(fit):
+            word = fit['word']
+            start = fit['coords']
+            end = (start[0] + len(word) * fit['direction'][0] - 1,
+                   start[1] + len(word) * fit['direction'][1] - 1)
+            return (word, (start, end))
+        coords = dict([to_coords(fit) for fit in best_fits])
+        return coords
+
+    def correctness_score(self, only_score=True):
+        num_correct = 0
+        guesses = self.find_all_coords()
+        incorrect_words = []
+        for (word, solution_coords) in self._solutions.items():
+            guess_coords = guesses[word]
+            if solution_coords == guess_coords:
+                num_correct += 1
+            else:
+                incorrect_words.append((word, (solution_coords, guess_coords)))
+        if only_score:
+            return num_correct
+        else:
+            return num_correct, dict(incorrect_words)
 
     def find_word_fits(self, word):
         masks = Masks(word)
