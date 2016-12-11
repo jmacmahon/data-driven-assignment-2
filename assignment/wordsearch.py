@@ -15,8 +15,30 @@ _directions = [
 ]
 
 
-def gen_mask_direction(word, direction):
+def gen_word_pattern(word, direction):
     word_numbers = [ord(c) - 97 for c in word.lower()]
+    word_pattern = np.zeros((
+        abs(len(word) * direction[1]) or 1,
+        abs(len(word) * direction[0]) or 1,
+        26
+    ))
+    xpos = -1 if direction[0] < 0 else 0
+    ypos = -1 if direction[1] < 0 else 0
+    for i in word_numbers:
+        word_pattern[ypos, xpos, i] = 1
+        xpos += direction[0]
+        ypos += direction[1]
+    return word_pattern
+
+
+def gen_mask_direction(word, direction):
+    # Tried optimising with
+    # - pre-generating a word pattern array and overlaying at different
+    #   positions (fuzzy_stats_3)
+    # - using a 5-D 'masks' array rather than recreating "current" each time
+    #   (fuzzy_stats_4)
+    word_numbers = [ord(c) - 97 for c in word.lower()]
+
     for y in range(15):
         for x in range(15):
             try:
@@ -27,7 +49,7 @@ def gen_mask_direction(word, direction):
                     xpos, ypos = (xpos + direction[0], ypos + direction[1])
                     if xpos < 0 or ypos < 0:
                         raise IndexError
-            except IndexError:
+            except (IndexError, ValueError):
                 continue
             yield (current, x, y, direction)
 
@@ -45,6 +67,7 @@ class Masks(object):
 
     def get_fits(self, wordsearch):
         matches = np.array(self._masks) * wordsearch.get_classified_array()
+        # matches = np.zeros((559, 15, 15, 26))
         sums = np.sum(matches, axis=(1, 2, 3))
         # If this is too slow, look at np.argpartition
         best = np.argsort(sums)
