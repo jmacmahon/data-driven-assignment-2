@@ -5,6 +5,7 @@ from scipy.stats import mode
 class Classifier(object):
     def __init__(self):
         self._confusion_matrix = None
+        self._normalised_confusion_matrix = None
 
     def loo_test(self):
         def loo_test_indiv(index):
@@ -55,9 +56,26 @@ class Classifier(object):
             self._confusion_matrix = self.loo_test()[0]
         return self._confusion_matrix
 
+    @property
+    def normalised_confusion_matrix(self):
+        if self._normalised_confusion_matrix is None:
+            confusion_matrix = self.confusion_matrix
+            length = confusion_matrix.shape[0]
+            sums = np.sum(confusion_matrix, axis=1).reshape(length, 1)
+            # Handle dividing by 0-sums
+            with np.errstate(divide='ignore', invalid='ignore'):
+                normalised_confusion_matrix = confusion_matrix/sums
+            for i in range(normalised_confusion_matrix.shape[0]):
+                if (~np.isfinite(normalised_confusion_matrix[i, i])):
+                    new_row = np.zeros(length)
+                    new_row[i] = 1
+                    normalised_confusion_matrix[i] = new_row
+            self._normalised_confusion_matrix = normalised_confusion_matrix
+        return self._normalised_confusion_matrix
+
 
 class KNearestNeighbour(Classifier):
-    def __init__(self, training_data, labels, k=1, fuzzy=False):
+    def __init__(self, training_data, labels, k=1, fuzzy=True):
         super().__init__()
         self._training_data = training_data
         self._labels = labels
@@ -68,12 +86,10 @@ class KNearestNeighbour(Classifier):
         self._modtrain = np.sqrt(np.sum(training_data ** 2, axis=1))
 
     def weighted_classify(self, test):
-        # Fuzziness for some reason makes results worse on the poor quality
-        # image
-        confusion_matrix = self.confusion_matrix
+        # Fuzziness slightly improves accuracy on poor quality image
         best_label = self.classify(test)
         if self._fuzzy:
-            probabilities = confusion_matrix[best_label - 1]
+            probabilities = self.normalised_confusion_matrix[best_label - 1]
         else:
             probabilities = np.zeros(26)
             probabilities[best_label - 1] = 1
