@@ -81,6 +81,7 @@ class Wordsearch(object):
 
     def classify(self, classifier):
         for l in self.letters:
+            # TODO profile this -- could optimise as np multiplication?
             l.classify(classifier)
         self._classified = True
 
