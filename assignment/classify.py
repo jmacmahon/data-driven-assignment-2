@@ -75,25 +75,14 @@ class Classifier(object):
 
 
 class KNearestNeighbour(Classifier):
-    def __init__(self, training_data, labels, k=1, fuzzy=True):
+    def __init__(self, training_data, labels, k=1):
         super().__init__()
         self._training_data = training_data
         self._labels = labels
         self._k = k
         self._kwargs = {"k": k}
-        self._fuzzy = fuzzy
 
         self._modtrain = np.sqrt(np.sum(training_data ** 2, axis=1))
-
-    def weighted_classify(self, test):
-        # Fuzziness slightly improves accuracy on poor quality image
-        best_label = self.classify(test)
-        if self._fuzzy:
-            probabilities = self.normalised_confusion_matrix[best_label - 1]
-        else:
-            probabilities = np.zeros(26)
-            probabilities[best_label - 1] = 1
-        return probabilities
 
     def classify(self, test):
         modtest = np.sqrt(np.sum(test ** 2))
@@ -102,3 +91,23 @@ class KNearestNeighbour(Classifier):
         nearest_k_indices = np.argsort(distances)[::-1][0:self._k]
         best_index = mode(nearest_k_indices).mode
         return self._labels[best_index]
+
+class WeightedKNearestNeighbour(Classifier):
+    def __init__(self, k=1, fuzzy=True):
+        super().__init__()
+        self._k = k
+        self._fuzzy = fuzzy
+
+    def train(self, training_data, labels):
+        self._classifier = KNearestNeighbour(training_data, labels, self._k)
+
+    def classify(self, test):
+        # Fuzziness slightly improves accuracy on poor quality image
+        best_label = self._classifier.classify(test)
+        if self._fuzzy:
+            confusion_matrix = self._classifier.normalised_confusion_matrix
+            probabilities = confusion_matrix[best_label - 1]
+        else:
+            probabilities = np.zeros(26)
+            probabilities[best_label - 1] = 1
+        return probabilities
