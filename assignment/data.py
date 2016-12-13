@@ -79,10 +79,10 @@ class Wordsearch(object):
         letterlist = [l.label_probabilities for l in self.letters]
         return np.array(letterlist).reshape(15, 15, 26)
 
-    def classify(self, classifier):
+    def classify(self, pipeline):
         for l in self.letters:
             # TODO profile this -- could optimise as np multiplication?
-            l.classify(classifier)
+            l.classify(pipeline)
         self._classified = True
 
     def _iter_extract_letters(self):
@@ -114,8 +114,8 @@ class Letter(object):
     def show(self):
         return show_letter(self._raw_data)
 
-    def classify(self, classifier):
-        self.label_probabilities = classifier.weighted_classify(self._raw_data)
+    def classify(self, pipeline):
+        self.label_probabilities = pipeline(self._raw_data)
         return self.label_probabilities
 
     def __repr__(self):
