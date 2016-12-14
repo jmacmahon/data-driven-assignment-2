@@ -1,0 +1,20 @@
+Sun Dec 11 17:06:09 2016    profiling/fuzzy_stats_4
+
+         101960 function calls (100873 primitive calls) in 1.911 seconds
+
+   Ordered by: internal time
+   List reduced from 508 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     1380    0.664    0.000    0.664    0.000 {built-in method numpy.core.multiarray.array}
+       24    0.519    0.022    1.193    0.050 /home/joe/data-driven-assignment-2/assignment/wordsearch.py:85(get_fits)
+    22328    0.293    0.000    0.332    0.000 /home/joe/data-driven-assignment-2/assignment/wordsearch.py:34(gen_mask_direction)
+      544    0.113    0.000    0.113    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+      389    0.077    0.000    0.077    0.000 {built-in method numpy.core.multiarray.zeros}
+       24    0.063    0.003    1.598    0.067 /home/joe/data-driven-assignment-2/assignment/data.py:38(find_word_fits)
+        1    0.032    0.032    1.690    1.690 /home/joe/data-driven-assignment-2/assignment/data.py:34(<listcomp>)
+       25    0.026    0.001    0.028    0.001 /usr/lib/python3.5/site-packages/numpy/ma/core.py:2305(masked_invalid)
+       24    0.009    0.000    0.051    0.002 /home/joe/data-driven-assignment-2/assignment/display.py:11(pixel_line)
+       24    0.009    0.000    0.342    0.014 /home/joe/data-driven-assignment-2/assignment/wordsearch.py:80(__init__)
+
+

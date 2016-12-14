@@ -1,0 +1,20 @@
+Wed Dec 14 00:05:53 2016    profiling/final_1
+
+         773446 function calls (769101 primitive calls) in 6.580 seconds
+
+   Ordered by: internal time
+   List reduced from 560 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       96    1.767    0.018    3.315    0.035 /home/joe/data-driven-assignment-2/assignment/wordsearch.py:68(get_fits)
+    20287    1.513    0.000    1.513    0.000 {built-in method numpy.core.multiarray.array}
+   178184    0.879    0.000    0.879    0.000 {built-in method numpy.core.multiarray.zeros}
+    89312    0.552    0.000    1.360    0.000 /home/joe/data-driven-assignment-2/assignment/wordsearch.py:34(gen_mask_direction)
+    10470    0.492    0.000    0.492    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+       96    0.178    0.002    4.894    0.051 /home/joe/data-driven-assignment-2/assignment/data.py:67(find_word_fits)
+      100    0.106    0.001    0.114    0.001 /usr/lib/python3.5/site-packages/numpy/ma/core.py:2305(masked_invalid)
+     4227    0.105    0.000    0.105    0.000 {built-in method numpy.core.multiarray.dot}
+     2394    0.073    0.000    0.073    0.000 {method 'argsort' of 'numpy.ndarray' objects}
+     2298    0.048    0.000    0.243    0.000 /usr/lib/python3.5/site-packages/scipy/stats/stats.py:377(mode)
+
+
