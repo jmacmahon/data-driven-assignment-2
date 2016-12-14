@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.cm import gray
+from math import sqrt, floor
 import numpy as np
 
 
