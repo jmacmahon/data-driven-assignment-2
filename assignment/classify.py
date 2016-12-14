@@ -67,8 +67,9 @@ class Classifier(object):
                 normalised_confusion_matrix = confusion_matrix/sums
             for i in range(normalised_confusion_matrix.shape[0]):
                 if (~np.isfinite(normalised_confusion_matrix[i, i])):
-                    new_row = np.zeros(length)
-                    new_row[i] = 1
+                    # new_row = np.zeros(length)
+                    # new_row[i] = 1
+                    new_row = np.full(length, 1.0/length)
                     normalised_confusion_matrix[i] = new_row
             self._normalised_confusion_matrix = normalised_confusion_matrix
         return self._normalised_confusion_matrix
@@ -91,6 +92,7 @@ class KNearestNeighbour(Classifier):
         nearest_k_indices = np.argsort(distances)[::-1][0:self._k]
         best_index = mode(nearest_k_indices).mode
         return self._labels[best_index]
+
 
 class WeightedKNearestNeighbour(Classifier):
     def __init__(self, k=1, fuzzy=True):
