@@ -1,4 +1,0 @@
-- Think about how to use numpy to classify all letters at once (if possible?)
-  - How boxing letters in objects is a clunky idea with this respect
-- Refactor constants out (e.g. 450x450)
-- Write code for evaluating NN classifier
