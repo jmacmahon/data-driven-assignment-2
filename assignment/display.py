@@ -34,6 +34,19 @@ def letter_line(x, y, direction, length, rad=2):
     return pixel_line(start, end, rad=rad)
 
 
+def find_line_image(word, coords, direction, rad=2):
+    x, y = coords
+    x += 0.5
+    y += 0.5
+    return letter_line(x, y, direction, len(word), rad=rad)
+
+
+def draw_lines(words, rad=2):
+    lines = [find_line_image(word, start, direction, rad=rad) for
+             (word, (start, end, direction)) in words.items()]
+    [plt.imshow(line, alpha=0.5) for line in lines]
+
+
 def show_letter(pixels):
     return show_image(pixels, (30, 30))
 

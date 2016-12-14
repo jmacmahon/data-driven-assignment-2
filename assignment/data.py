@@ -1,7 +1,8 @@
-from .display import show_letter, show_wordsearch, show_image, letter_line
+from .display import show_letter, show_wordsearch, show_image, draw_lines
 from .wordsearch import Masks
 import numpy as np
 import matplotlib.pyplot as plt
+from logging import getLogger
 
 
 class Data(object):
@@ -18,45 +19,43 @@ class Data(object):
 
 
 class Wordsearch(object):
-    def __init__(self, raw_data, words, solutions):
+    def __init__(self, raw_data, words, solutions=None):
         self._raw_data = raw_data
         self._classified = False
         self.letters = list(self._iter_extract_letters())
         self._words = words
         self._solutions = solutions
+        self._coords = None
 
-    def find_line_image(self, word, rad=2):
-        best = self.find_word_fits(word)[0]
-        x, y = best['coords']
-        x += 0.5
-        y += 0.5
-        return letter_line(x, y, best['direction'], len(word), rad=rad)
+    @property
+    def coords(self):
+        if self._coords is None:
+            self._coords = self._find_all_coords()
+        return self._coords
 
-    # TODO refactor this into display
-    def find_all_and_show(self, rad=2):
-        lines = [self.find_line_image(word, rad=rad) for word in self._words]
-        self.show()
-        [plt.imshow(line, alpha=0.5) for line in lines]
-
-    def find_all_coords(self):
+    def _find_all_coords(self):
         best_fits = [self.find_word_fits(word)[0] for word in self._words]
 
         def to_coords(fit):
             word = fit['word']
             start = fit['coords']
+            direction = fit['direction']
             end = (start[0] + len(word) * fit['direction'][0] - 1,
                    start[1] + len(word) * fit['direction'][1] - 1)
-            return (word, (start, end))
+            return (word, (start, end, direction))
 
         coords = dict([to_coords(fit) for fit in best_fits])
+        getLogger('assignment.data.wordsearch')\
+            .info("Found best fits for all words")
         return coords
 
     def correctness_score(self, only_score=True):
+        if self._solutions is None:
+            raise ValueError("No solutions provided")
         num_correct = 0
-        guesses = self.find_all_coords()
         incorrect_words = []
         for (word, solution_coords) in self._solutions.items():
-            guess_coords = guesses[word]
+            guess_coords = self.coords[word][0:2]
             if solution_coords == guess_coords:
                 num_correct += 1
             else:
@@ -85,6 +84,8 @@ class Wordsearch(object):
         for l in self.letters:
             # TODO profile this -- could optimise as np multiplication?
             l.classify(pipeline)
+        getLogger('assignment.data.wordsearch')\
+            .info("Classified all letters")
         self._classified = True
 
     def _iter_extract_letters(self):
@@ -106,6 +107,10 @@ class Wordsearch(object):
 
     def show(self):
         return show_wordsearch(self._raw_data)
+
+    def show_solved(self, rad=2):
+        self.show()
+        return draw_lines(self.coords, rad=rad)
 
 
 class Letter(object):

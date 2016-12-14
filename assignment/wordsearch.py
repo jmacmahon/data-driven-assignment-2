@@ -1,5 +1,6 @@
 import numpy as np
 from itertools import chain
+from logging import getLogger
 
 _centre_right = (1, 0)
 _bottom_right = (1, 1)
@@ -13,22 +14,6 @@ _directions = [
     _centre_right, _bottom_right, _bottom_centre, _bottom_left, _centre_left,
     _top_left, _top_centre, _top_right
 ]
-
-
-def gen_word_pattern(word, direction):
-    word_numbers = [ord(c) - 97 for c in word.lower()]
-    word_pattern = np.zeros((
-        abs(len(word) * direction[1]) or 1,
-        abs(len(word) * direction[0]) or 1,
-        26
-    ))
-    xpos = -1 if direction[0] < 0 else 0
-    ypos = -1 if direction[1] < 0 else 0
-    for i in word_numbers:
-        word_pattern[ypos, xpos, i] = 1
-        xpos += direction[0]
-        ypos += direction[1]
-    return word_pattern
 
 
 def gen_mask_direction(word, direction):
@@ -71,6 +56,9 @@ class Masks(object):
         sums = np.sum(matches, axis=(1, 2, 3))
         # If this is too slow, look at np.argpartition
         best = np.argsort(sums)
+        getLogger('assignment.wordsearch.masks')\
+            .info("Computed fit scores for word = {}"
+                  .format(self._word))
         return MaskFits(sums, self._masks, self._xs, self._ys,
                         self._directions, best, self._word)
 

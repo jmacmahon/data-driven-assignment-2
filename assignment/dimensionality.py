@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.linalg import eigh
 from scipy.stats import f_oneway
+from logging import getLogger
 
 
 class IdentityReducer(object):
@@ -23,18 +24,28 @@ class PCAReducer(IdentityReducer):
         self._eigenvectors = eigenvectors
 
         self._mean = np.mean(train_data, axis=0)
+        getLogger('assignment.dimensionality.pca')\
+            .info("Trained PCA reducer ({} -> {} dimensions)"
+                  .format(dim, self._n))
 
     def reduce(self, data, n=None):
         if n is None:
             n = self._n
         centred_data = data - self._mean
         vs = self._eigenvectors[:, :n]
+        getLogger('assignment.dimensionality.pca')\
+            .debug("PCA-reduced some samples")
         return np.dot(centred_data, vs)
 
 
 class DropFirstNSelector(IdentityReducer):
     def __init__(self, n=1):
         self._n = n
+        start_dim = "k"
+        end_dim = "(k-{})".format(n)
+        getLogger('assignment.dimensionality.dropfirstn')\
+            .info("Init Drop First N feature selector ({} -> {} dimensions)"
+                  .format(start_dim, end_dim))
 
     def reduce(self, data):
         return data.transpose()[self._n:].transpose()
@@ -49,8 +60,12 @@ class BestKSelector(IdentityReducer):
         # Use f_oneway from scipy as a divergence measure
         scores = f_oneway(*classes).statistic
         self._best_k = np.argsort(scores)[::-1][:self._k]
+        getLogger('assignment.dimensionality.bestk')\
+            .info("Trained Best-K feature selector")
 
     def reduce(self, data):
+        getLogger('assignment.dimensionality.bestk')\
+            .debug("Best-K reduced some samples")
         return data.transpose()[self._best_k].transpose()
 
 
@@ -62,6 +77,12 @@ class BorderTrimReducer(IdentityReducer):
         self._right = right
         self._left = left
         self._startshape = startshape
+        start_dim = startshape[0] * startshape[1]
+        end_dim = ((startshape[0] - top - bottom) *
+                   (startshape[1] - left - right))
+        getLogger('assignment.dimensionality.bordertrim')\
+            .info("Init Border Trim Reducer ({} -> {} dimensions)"
+                  .format(start_dim, end_dim))
 
     def reduce(self, data, flatten=True):
         data = data.reshape(-1, *self._startshape)
@@ -76,4 +97,6 @@ class BorderTrimReducer(IdentityReducer):
             return out.flatten()
         new_len = ((width - self._left - self._right) *
                    (height - self._top - self._bottom))
+        getLogger('assignment.dimensionality.bordertrim')\
+            .debug("Trimmed border")
         return out.reshape(-1, new_len)

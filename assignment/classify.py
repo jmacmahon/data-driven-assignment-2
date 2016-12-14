@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import mode
+from logging import getLogger
 
 
 class Classifier(object):
@@ -32,6 +33,7 @@ class Classifier(object):
             confusion_matrix[classified_label - 1, actual_label - 1] += 1
             if classified_label == actual_label:
                 correct += 1
+        getLogger('assignment.classifier').info("Performed LOO testing")
         return confusion_matrix, correct / float(n), (n - correct)
 
     def partition_test(self, n):
@@ -47,13 +49,14 @@ class Classifier(object):
         for i in range(n):
             if test_labels[i] == test_classifier.classify(test_data[i, :]):
                 correct += 1
-        # TODO confusion matrix
+        getLogger('assignment.classifier').info("Performed partition testing")
         return correct / float(n), (n - correct)
 
     @property
     def confusion_matrix(self):
         if self._confusion_matrix is None:
             self._confusion_matrix = self.loo_test()[0]
+        getLogger('assignment.classifier').debug("Built confusion matrix")
         return self._confusion_matrix
 
     @property
@@ -72,6 +75,8 @@ class Classifier(object):
                     new_row = np.full(length, 1.0/length)
                     normalised_confusion_matrix[i] = new_row
             self._normalised_confusion_matrix = normalised_confusion_matrix
+            getLogger('assignment.classifier')\
+                .info("Built normalised confusion matrix")
         return self._normalised_confusion_matrix
 
 
@@ -91,6 +96,15 @@ class KNearestNeighbour(Classifier):
         distances = dots/(modtest * self._modtrain)
         nearest_k_indices = np.argsort(distances)[::-1][0:self._k]
         best_index = mode(nearest_k_indices).mode
+        if len(test.shape) == 1:
+            samples = 1
+            dim = test.shape[0]
+        else:
+            samples = test.shape[-1]
+            dim = test.shape[:-1]
+        getLogger('assignment.classifier.knn')\
+            .debug("Classified {} samples of {} dimensions"
+                   .format(samples, dim))
         return self._labels[best_index]
 
 
@@ -102,6 +116,10 @@ class WeightedKNearestNeighbour(Classifier):
 
     def train(self, training_data, labels):
         self._classifier = KNearestNeighbour(training_data, labels, self._k)
+        self._classifier.normalised_confusion_matrix
+        getLogger('assignment.classifier.weightedknn')\
+            .info("Trained weighted k-NN classifier with fuzzy = {}"
+                  .format(self._fuzzy))
 
     def classify(self, test):
         # Fuzziness slightly improves accuracy on poor quality image
@@ -112,4 +130,13 @@ class WeightedKNearestNeighbour(Classifier):
         else:
             probabilities = np.zeros(26)
             probabilities[best_label - 1] = 1
+        if len(test.shape) == 1:
+            samples = 1
+            dim = test.shape[0]
+        else:
+            samples = test.shape[-1]
+            dim = test.shape[:-1]
+        getLogger('assignment.classifier.weightedknn')\
+            .debug("Classified {} samples of {} dimensions"
+                   .format(samples, dim))
         return probabilities
