@@ -2,12 +2,14 @@ import numpy as np
 from scipy.linalg import eigh
 from scipy.stats import f_oneway
 
+
 class IdentityReducer(object):
     def train(self, *_, **__):
         pass
 
     def reduce(self, data, *_, **__):
         return data
+
 
 class PCAReducer(IdentityReducer):
     def __init__(self, n=40):
@@ -30,9 +32,12 @@ class PCAReducer(IdentityReducer):
         return np.dot(centred_data, vs)
 
 
-class DropFirstSelector(IdentityReducer):
+class DropFirstNSelector(IdentityReducer):
+    def __init__(self, n=1):
+        self._n = n
+
     def reduce(self, data):
-        return data.transpose()[1:].transpose()
+        return data.transpose()[self._n:].transpose()
 
 
 class BestKSelector(IdentityReducer):
@@ -50,7 +55,8 @@ class BestKSelector(IdentityReducer):
 
 
 class BorderTrimReducer(IdentityReducer):
-    def __init__(self, top=10, bottom=10, left=10, right=10, startshape=(30, 30)):
+    def __init__(self, top=10, bottom=10, left=10, right=10,
+                 startshape=(30, 30)):
         self._top = top
         self._bottom = bottom
         self._right = right
@@ -68,5 +74,6 @@ class BorderTrimReducer(IdentityReducer):
             return out
         if data.shape[0] == 1:
             return out.flatten()
-        new_len = (width - self._left - self._right) * (height - self._top - self._bottom)
+        new_len = ((width - self._left - self._right) *
+                   (height - self._top - self._bottom))
         return out.reshape(-1, new_len)

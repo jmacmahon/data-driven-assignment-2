@@ -40,12 +40,14 @@ class Wordsearch(object):
 
     def find_all_coords(self):
         best_fits = [self.find_word_fits(word)[0] for word in self._words]
+
         def to_coords(fit):
             word = fit['word']
             start = fit['coords']
             end = (start[0] + len(word) * fit['direction'][0] - 1,
                    start[1] + len(word) * fit['direction'][1] - 1)
             return (word, (start, end))
+
         coords = dict([to_coords(fit) for fit in best_fits])
         return coords
 
