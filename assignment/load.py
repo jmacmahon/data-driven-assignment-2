@@ -1,3 +1,5 @@
+"""Some helper functions for loading the example assignment data."""
+
 from pickle import load
 from .data import Data
 
@@ -32,6 +34,12 @@ CORRECT_COORDS = {
 
 
 def load_data(pickle_path=DEFAULT_PATH):
+    """Load the example data from the provided path.
+
+    :param pickle_path: The path to load from
+
+    :return: A `data.Data` object containing the example data
+    """
     with open(pickle_path, "rb") as f:
         data = load(f)
     data['correct_coords'] = CORRECT_COORDS

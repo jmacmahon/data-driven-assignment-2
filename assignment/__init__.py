@@ -1,3 +1,8 @@
+"""Module containing all code for COM3004 assignment 2.
+
+The main entry point is the `wordsearch` function.
+"""
+
 import matplotlib.pyplot as plt
 import logging
 
@@ -11,6 +16,14 @@ logging.basicConfig(level=logging.INFO)
 
 
 def wordsearch(test, words, train_data, labels):
+    """Solve a wordsearch and display the solution.
+
+    :param test: The input image as a 450x450 numpy array
+    :param words: A list of words to search for in the wordsearch
+    :param train_data: A numpy array of n 30x30 letter images
+    :param labels: A numpy array of n letter labels corresponding to the
+        train_data
+    """
     pipeline = Pipeline(classifier=WeightedKNearestNeighbour(k=1, fuzzy=True),
                         reducers=[BorderTrimReducer(0, 4, 0, 3),
                                   PCAReducer(11),
@@ -33,6 +46,7 @@ def wordsearch(test, words, train_data, labels):
 
 
 def load_and_wordsearch():
+    """Helper function for solving the sample wordsearches provided."""
     from .load import load_data
     data = load_data()
     wordsearch(data.wordsearch1._raw_data, data.wordsearch1._words,
